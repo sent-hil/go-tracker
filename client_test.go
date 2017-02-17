@@ -195,8 +195,8 @@ var _ = Describe("Tracker Client", func() {
 		})
 	})
 
-	Describe("listing stories", func() {
-		It("gets all the stories by default", func() {
+	Describe("listing project memberships", func() {
+		It("gets all the project memberships", func() {
 			server.AppendHandlers(
 				ghttp.CombineHandlers(
 					ghttp.VerifyRequest("GET", "/services/v5/projects/99/memberships"),
