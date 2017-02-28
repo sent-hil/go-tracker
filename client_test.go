@@ -416,6 +416,43 @@ var _ = Describe("Tracker Client", func() {
 			})
 		})
 	})
+
+	Describe("creating a task", func() {
+		It("POSTs", func() {
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("POST", "/services/v5/projects/99/stories/560/tasks"),
+					ghttp.VerifyJSON(`{"description":"some-tracker-task", "position":1}`),
+					verifyTrackerToken(),
+
+					ghttp.RespondWith(http.StatusOK, `{
+					  "kind": "task",
+					  "id": 1234,
+					  "story_id": 560,
+					  "description": "some-tracker-task",
+					  "complete": false,
+					  "position": 1
+					}`),
+				),
+			)
+
+			client := tracker.NewClient("api-token")
+
+			task, err := client.InProject(99).CreateTask(560, tracker.Task{
+				Description: "some-tracker-task",
+				Position:    1,
+			})
+
+			Ω(task).Should(Equal(tracker.Task{
+				ID:          1234,
+				StoryID:     560,
+				Description: "some-tracker-task",
+				Position:    1,
+				IsComplete:  false,
+			}))
+			Ω(err).ShouldNot(HaveOccurred())
+		})
+	})
 })
 
 func verifyTrackerToken() http.HandlerFunc {

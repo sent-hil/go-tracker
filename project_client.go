@@ -118,6 +118,23 @@ func (p ProjectClient) DeleteStory(storyId int) error {
 	return err
 }
 
+func (p ProjectClient) CreateTask(storyID int, task Task) (Task, error) {
+	url := fmt.Sprintf("/stories/%d/tasks", storyID)
+	request, err := p.createRequest("POST", url, nil)
+	if err != nil {
+		return Task{}, err
+	}
+
+	buffer := &bytes.Buffer{}
+	json.NewEncoder(buffer).Encode(task)
+
+	p.addJSONBodyReader(request, buffer)
+
+	var createdTask Task
+	_, err = p.conn.Do(request, &createdTask)
+	return createdTask, err
+}
+
 func (p ProjectClient) ProjectMemberships() ([]ProjectMembership, error) {
 	request, err := p.createRequest("GET", "/memberships", nil)
 	if err != nil {
