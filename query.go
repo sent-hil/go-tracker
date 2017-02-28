@@ -78,3 +78,9 @@ func (query ActivityQuery) Query() url.Values {
 
 	return params
 }
+
+type TaskQuery struct {}
+
+func (query TaskQuery) Query() url.Values {
+	return url.Values{}
+}

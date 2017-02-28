@@ -46,6 +46,22 @@ var _ = Describe("Story", func() {
 	})
 })
 
+var _ = Describe("Task", func() {
+	It("has attributes", func() {
+		var tasks []tracker.Task
+		reader := strings.NewReader(Fixture("tasks.json"))
+		err := json.NewDecoder(reader).Decode(&tasks)
+		Ω(err).ToNot(HaveOccurred())
+		task := tasks[0]
+
+		Ω(task.ID).Should(Equal(52167427))
+		Ω(task.StoryID).Should(Equal(137910061))
+		Ω(task.Description).Should(Equal("some-task-description"))
+		Ω(task.IsComplete).Should(BeTrue())
+		Ω(task.Position).Should(Equal(1))
+	})
+})
+
 var _ = Describe("Activity", func() {
 	It("has attributes", func() {
 		var activities []tracker.Activity
