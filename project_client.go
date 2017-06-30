@@ -43,6 +43,18 @@ func (p ProjectClient) StoryActivity(storyId int, query ActivityQuery) (activiti
 	return activities, err
 }
 
+func (p ProjectClient) StoryTasks(storyId int, query TaskQuery) (tasks []Task, err error) {
+	url := fmt.Sprintf("/stories/%d/tasks", storyId)
+
+	request, err := p.createRequest("GET", url, query.Query())
+	if err != nil {
+		return tasks, err
+	}
+
+	_, err = p.conn.Do(request, &tasks)
+	return tasks, err
+}
+
 func (p ProjectClient) DeliverStoryWithComment(storyId int, comment string) error {
 	err := p.DeliverStory(storyId)
 	if err != nil {
@@ -104,6 +116,23 @@ func (p ProjectClient) DeleteStory(storyId int) error {
 
 	_, err = p.conn.Do(request, nil)
 	return err
+}
+
+func (p ProjectClient) CreateTask(storyID int, task Task) (Task, error) {
+	url := fmt.Sprintf("/stories/%d/tasks", storyID)
+	request, err := p.createRequest("POST", url, nil)
+	if err != nil {
+		return Task{}, err
+	}
+
+	buffer := &bytes.Buffer{}
+	json.NewEncoder(buffer).Encode(task)
+
+	p.addJSONBodyReader(request, buffer)
+
+	var createdTask Task
+	_, err = p.conn.Do(request, &createdTask)
+	return createdTask, err
 }
 
 func (p ProjectClient) ProjectMemberships() ([]ProjectMembership, error) {

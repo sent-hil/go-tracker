@@ -34,6 +34,18 @@ type Story struct {
 	AcceptedAt *time.Time `json:"accepted_at,omitempty"`
 }
 
+type Task struct {
+	ID      int `json:"id,omitempty"`
+	StoryID int `json:"story_id,omitempty"`
+
+	Description string `json:"description,omitempty"`
+	IsComplete  bool   `json:"complete,omitempty"`
+	Position    int    `json:"position,omitempty"`
+
+	CreatedAt *time.Time `json:"created_at,omitempty"`
+	UpdatedAt *time.Time `json:"updated_at,omitempty"`
+}
+
 type Comment struct {
 	Text string `json:"text,omitempty"`
 }

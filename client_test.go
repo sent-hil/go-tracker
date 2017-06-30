@@ -261,6 +261,53 @@ var _ = Describe("Tracker Client", func() {
 		})
 	})
 
+	Describe("listing a story's tasks", func() {
+		It("gets the story's tasks", func() {
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("GET", "/services/v5/projects/99/stories/560/tasks"),
+					verifyTrackerToken(),
+
+					ghttp.RespondWith(http.StatusOK, Fixture("tasks.json")),
+				),
+			)
+
+			client := tracker.NewClient("api-token")
+
+			tasks, err := client.InProject(99).StoryTasks(560, tracker.TaskQuery{})
+			Ω(tasks).Should(HaveLen(3))
+			Ω(err).ToNot(HaveOccurred())
+		})
+
+		It("allows different queries to be made", func() {
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest(
+						"GET",
+						"/services/v5/projects/99/stories/560/activity",
+						"limit=2&occurred_after=1000000000000&occurred_before=1433091819000&offset=1&since_version=1",
+					),
+					verifyTrackerToken(),
+
+					ghttp.RespondWith(http.StatusOK, Fixture("activities.json")),
+				),
+			)
+
+			client := tracker.NewClient("api-token")
+
+			query := tracker.ActivityQuery{
+				Limit:          2,
+				Offset:         1,
+				OccurredBefore: 1433091819000,
+				OccurredAfter:  1000000000000,
+				SinceVersion:   1,
+			}
+			activities, err := client.InProject(99).StoryActivity(560, query)
+			Ω(activities).Should(HaveLen(4))
+			Ω(err).ToNot(HaveOccurred())
+		})
+	})
+
 	Describe("delivering a story", func() {
 		It("HTTP PUTs it in its place", func() {
 			server.AppendHandlers(
@@ -367,6 +414,43 @@ var _ = Describe("Tracker Client", func() {
 				err := client.InProject(99).DeleteStory(1234)
 				Ω(err).Should(Equal(errors.New("request failed (500)")))
 			})
+		})
+	})
+
+	Describe("creating a task", func() {
+		It("POSTs", func() {
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("POST", "/services/v5/projects/99/stories/560/tasks"),
+					ghttp.VerifyJSON(`{"description":"some-tracker-task", "position":1}`),
+					verifyTrackerToken(),
+
+					ghttp.RespondWith(http.StatusOK, `{
+					  "kind": "task",
+					  "id": 1234,
+					  "story_id": 560,
+					  "description": "some-tracker-task",
+					  "complete": false,
+					  "position": 1
+					}`),
+				),
+			)
+
+			client := tracker.NewClient("api-token")
+
+			task, err := client.InProject(99).CreateTask(560, tracker.Task{
+				Description: "some-tracker-task",
+				Position:    1,
+			})
+
+			Ω(task).Should(Equal(tracker.Task{
+				ID:          1234,
+				StoryID:     560,
+				Description: "some-tracker-task",
+				Position:    1,
+				IsComplete:  false,
+			}))
+			Ω(err).ShouldNot(HaveOccurred())
 		})
 	})
 })
