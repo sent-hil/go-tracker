@@ -17,6 +17,7 @@ import (
 	"fmt"
 	"net/url"
 	"strings"
+	"time"
 )
 
 type Query interface {
@@ -24,9 +25,10 @@ type Query interface {
 }
 
 type StoriesQuery struct {
-	State  StoryState
-	Label  string
-	Filter []string
+	State         StoryState
+	Label         string
+	Filter        []string
+	AcceptedAfter time.Time
 
 	Limit  int
 	Offset int
@@ -53,6 +55,13 @@ func (query StoriesQuery) Query() url.Values {
 
 	if query.Offset != 0 {
 		params.Set("offset", fmt.Sprintf("%d", query.Offset))
+	}
+
+	if !query.AcceptedAfter.IsZero() {
+		params.Set(
+			"accepted_after",
+			fmt.Sprintf("%d", query.AcceptedAfter.UnixNano()/int64(time.Millisecond)),
+		)
 	}
 
 	return params
@@ -92,7 +101,7 @@ func (query ActivityQuery) Query() url.Values {
 	return params
 }
 
-type TaskQuery struct {}
+type TaskQuery struct{}
 
 func (query TaskQuery) Query() url.Values {
 	return url.Values{}

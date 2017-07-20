@@ -14,6 +14,8 @@
 package tracker_test
 
 import (
+	"time"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/xoebus/go-tracker"
@@ -63,6 +65,16 @@ var _ = Describe("Queries", func() {
 				}
 				Ω(queryString(query)).Should(Equal("filter=owner%3Adv+state%3Astarted"))
 			})
+		})
+
+		It("can query by stories accepted after given time", func() {
+			t, err := time.Parse("Jan 2 15:04:05 MST 2006", "Jan 1 00:00:01 UTC 1970")
+			Ω(err).ToNot(HaveOccurred())
+
+			query := tracker.StoriesQuery{
+				AcceptedAfter: t,
+			}
+			Ω(queryString(query)).Should(Equal("accepted_after=1000"))
 		})
 
 		It("can limit the numer of results", func() {
