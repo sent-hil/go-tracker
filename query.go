@@ -25,10 +25,11 @@ type Query interface {
 }
 
 type StoriesQuery struct {
-	State         StoryState
-	Label         string
-	Filter        []string
-	AcceptedAfter time.Time
+	State          StoryState
+	Label          string
+	Filter         []string
+	AcceptedAfter  time.Time
+	AcceptedBefore time.Time
 
 	Limit  int
 	Offset int
@@ -61,6 +62,13 @@ func (query StoriesQuery) Query() url.Values {
 		params.Set(
 			"accepted_after",
 			fmt.Sprintf("%d", query.AcceptedAfter.UnixNano()/int64(time.Millisecond)),
+		)
+	}
+
+	if !query.AcceptedBefore.IsZero() {
+		params.Set(
+			"accepted_before",
+			fmt.Sprintf("%d", query.AcceptedBefore.UnixNano()/int64(time.Millisecond)),
 		)
 	}
 

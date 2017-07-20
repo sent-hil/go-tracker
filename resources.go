@@ -30,8 +30,11 @@ type Project struct {
 }
 
 type Story struct {
-	ID        int `json:"id,omitempty"`
-	ProjectID int `json:"project_id,omitempty"`
+	ID        int   `json:"id,omitempty"`
+	ProjectID int   `json:"project_id,omitempty"`
+	OwnerIDs  []int `json:"owner_ids"`
+
+	Estimate int `json:"estimate"`
 
 	URL string `json:"url,omitempty"`
 
